@@ -3,14 +3,20 @@ import { createTrackerState } from './utils/tracker-state'
 import { STORAGE_KEY } from './utils/tracker-storage'
 
 useHead({ title: 'Today · Daily practice', htmlAttrs: { lang: 'en' } })
-const { document: tracker, today, ready, error, announcement, rows, refresh, toggle, retry } =
-  createTrackerState(() => window.localStorage)
+const { document: tracker, today, ready, error, announcement, rows, refresh, toggle, retry, canAddHydration, addHydration } =
+  createTrackerState(() => window.localStorage, () => new Date(), useRuntimeConfig().public.hydrationHabit)
 const completed = computed(() => rows.value.filter(row => row.done).length)
 const formattedDate = computed(() => today.value
   ? new Intl.DateTimeFormat('en', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
     .format(new Date(`${today.value}T12:00:00`))
   : '')
 let midnightTimer: ReturnType<typeof setTimeout> | undefined
+
+async function addHydrationAndFocus() {
+  addHydration()
+  await nextTick()
+  document.getElementById('habit-hydration')?.focus()
+}
 
 function update() {
   refresh()
@@ -55,6 +61,7 @@ onBeforeUnmount(() => {
       </div>
       <p v-if="!tracker && !error" class="loading-state" role="status">Loading your habits…</p>
       <template v-if="tracker">
+        <button v-if="canAddHydration" type="button" @click="addHydrationAndFocus">Add hydration habit</button>
         <p v-if="rows.length === 0" class="loading-state">No habits are saved in this tracker yet.</p>
         <ul v-else class="habit-list" aria-label="Habits for today">
           <HabitItem v-for="row in rows" :key="row.habit.id"

@@ -42,6 +42,21 @@ Habit IDs are unique lowercase letters, digits, and hyphens, beginning with a le
 
 An empty habits array and completion map are valid. Starter initialization creates Reading, Sleep, and Exercise with the confirmed goals. Sleep is entered on the wake-up date. Exercise has a target of three distinct dates per Monday–Sunday week. Stats are derived, never persisted. Future completion labels caused by a device clock change are preserved and excluded by streak calculations until their date arrives.
 
+## Input capacity
+
+All limits are inclusive and apply to both load and save:
+
+| Input | Maximum |
+| --- | --- |
+| Raw stored JSON / serialized output | 1,048,576 JavaScript string characters, measured as UTF-16 code units |
+| Habits | 64 |
+| Completion entries per habit | 20,000 |
+| Completion entries across all habits | 60,000 |
+
+Raw length is checked before JSON parsing. Habit count is checked before habit validation; all completion-list sizes are checked before date iteration or deduplication. Duplicate entries count toward the input limits. Version-1 migration uses the same limits. Save checks the bounded canonical output length and refuses to overwrite an oversized stored document. Values above a limit return `invalid-data`, with no writes or truncation. Existing oversized records remain intact for recovery.
+
+These capacities support roughly 54 years of daily records for three habits, subject to the overall JSON-size limit. Browser quota errors still return `write-failed`; the application capacity does not guarantee that the browser has that much free storage.
+
 ## Missing data and upgrades
 
 | Stored state | Load behavior |

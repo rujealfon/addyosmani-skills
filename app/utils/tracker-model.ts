@@ -1,5 +1,12 @@
 import { calendarDay } from './daily-streaks.ts'
 
+export const TRACKER_LIMITS = Object.freeze({
+  maxJsonLength: 1_048_576,
+  maxHabits: 64,
+  maxCompletionsPerHabit: 20_000,
+  maxTotalCompletions: 60_000,
+})
+
 export type Schedule = { kind: 'daily' } | { kind: 'weekly'; targetDays: number }
 export interface Habit {
   id: string
@@ -52,6 +59,7 @@ export function validateDocument(input: unknown): TrackerDocument {
   const value = record(input)
   exactKeys(value, ['schemaVersion', 'trackingStartedOn', 'habits', 'completions'])
   requireValid(value.schemaVersion === 2 && Array.isArray(value.habits))
+  requireValid(value.habits.length <= TRACKER_LIMITS.maxHabits)
   const trackingStartedOn = date(value.trackingStartedOn)
   const habits: Habit[] = value.habits.map((inputHabit: unknown) => {
     const habit = record(inputHabit)
@@ -75,6 +83,14 @@ export function validateDocument(input: unknown): TrackerDocument {
   requireValid(new Set(habits.map(habit => habit.id)).size === habits.length)
   const entries = record(value.completions)
   exactKeys(entries, habits.map(habit => habit.id))
+  // Bound the entire workload before validating or deduplicating any date list.
+  let totalCompletions = 0
+  for (const habit of habits) {
+    const list = entries[habit.id]
+    requireValid(Array.isArray(list) && list.length <= TRACKER_LIMITS.maxCompletionsPerHabit)
+    totalCompletions += list.length
+    requireValid(totalCompletions <= TRACKER_LIMITS.maxTotalCompletions)
+  }
   const completions = Object.fromEntries(habits.map(habit => {
     const list = entries[habit.id]
     requireValid(Array.isArray(list))

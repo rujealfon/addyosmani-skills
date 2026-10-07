@@ -1,5 +1,5 @@
 import { calendarDay } from './daily-streaks.ts'
-import { migrateVersionOne, starterDocument, validateDocument } from './tracker-model.ts'
+import { migrateVersionOne, starterDocument, TRACKER_LIMITS, validateDocument } from './tracker-model.ts'
 import type { TrackerDocument } from './tracker-model.ts'
 
 export const STORAGE_KEY = 'habit-tracker:v1'
@@ -23,6 +23,7 @@ export function storageFailure(code: StorageErrorCode): Failure {
 }
 
 function decode(raw: string): LoadResult {
+  if (raw.length > TRACKER_LIMITS.maxJsonLength) return storageFailure('invalid-data')
   try {
     const input: unknown = JSON.parse(raw)
     if (!input || typeof input !== 'object' || !('schemaVersion' in input)) {
@@ -42,8 +43,11 @@ function decode(raw: string): LoadResult {
 
 export function save(storage: StoragePort, document: unknown): SaveResult {
   let data: TrackerDocument
+  let serialized: string
   try {
     data = validateDocument(document)
+    serialized = JSON.stringify(data)
+    if (serialized.length > TRACKER_LIMITS.maxJsonLength) return storageFailure('invalid-data')
   } catch {
     return storageFailure('invalid-data')
   }
@@ -58,7 +62,7 @@ export function save(storage: StoragePort, document: unknown): SaveResult {
     if (!prior.ok) return prior
   }
   try {
-    storage.setItem(STORAGE_KEY, JSON.stringify(data))
+    storage.setItem(STORAGE_KEY, serialized)
     return { ok: true, data }
   } catch {
     return storageFailure('write-failed')

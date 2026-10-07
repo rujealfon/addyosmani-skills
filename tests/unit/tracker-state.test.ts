@@ -54,6 +54,51 @@ test('another tab corrupting storage disables edits and preserves the value', ()
   assert.equal(state.rows.value[0]?.done, false)
 })
 
+test('same-day focus and visibility refresh preserve the failed edit and its error', () => {
+  const { state, block, set } = setup()
+  state.refresh()
+  block(true)
+  state.toggle('reading', true)
+  const failedError = state.error.value
+  block(false)
+  // Another tab saves Sleep while the user is away; retry must retain that edit.
+  const latest = JSON.parse(JSON.stringify(state.document.value))
+  latest.completions.sleep = ['2026-10-07']
+  set(JSON.stringify(latest))
+  state.refresh()
+  state.refresh()
+  assert.deepEqual(state.error.value, failedError)
+  assert.equal(state.rows.value[0]?.done, false)
+  assert.equal(state.rows.value[1]?.done, true)
+  state.retry()
+  assert.equal(state.rows.value[0]?.done, true)
+  assert.equal(state.rows.value[1]?.done, true)
+  assert.equal(state.error.value, null)
+  state.refresh()
+  state.retry()
+  assert.deepEqual(state.document.value?.completions.reading, ['2026-10-07'])
+})
+
+test('a midnight refresh cancels a failed intent and explains the changed day', () => {
+  let now = new Date(2026, 9, 7, 12)
+  let blocked = false
+  let value: string | null = null
+  const state = createTrackerState(() => ({ getItem: () => value, setItem: (_key, next) => {
+    if (blocked) throw new Error('full')
+    value = next
+  } }), () => now)
+  state.refresh()
+  blocked = true
+  state.toggle('reading', true)
+  now = new Date(2026, 9, 8, 1)
+  blocked = false
+  state.refresh()
+  state.retry()
+  assert.deepEqual(state.document.value?.completions.reading, [])
+  assert.equal(state.error.value, null)
+  assert.match(state.announcement.value, /day changed/i)
+})
+
 test('a retry after midnight does not silently complete a different date', () => {
   let now = new Date(2026, 9, 7, 12)
   let blocked = false

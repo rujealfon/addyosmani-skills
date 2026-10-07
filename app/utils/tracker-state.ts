@@ -15,7 +15,7 @@ export function createTrackerState(getStorage: () => StoragePort, now = () => ne
   const ready = ref(false)
   const error = shallowRef<Failure['error'] | null>(null)
   const announcement = ref('')
-  let pending: { id: string; done: boolean; date: string } | null = null
+  let pending: { id: string; done: boolean; date: string; error: Failure['error'] } | null = null
   const rows = computed(() => (document.value?.habits ?? []).map(habit => {
     const dates = document.value!.completions[habit.id]!
     const stats = habit.schedule.kind === 'daily'
@@ -26,7 +26,10 @@ export function createTrackerState(getStorage: () => StoragePort, now = () => ne
 
   function refresh() {
     today.value = localDate(now())
-    pending = null
+    if (pending && pending.date !== today.value) {
+      pending = null
+      announcement.value = 'The day changed. Check today’s habits before marking them done.'
+    }
     let result
     try {
       result = load(getStorage(), today.value)
@@ -34,7 +37,7 @@ export function createTrackerState(getStorage: () => StoragePort, now = () => ne
       result = storageFailure('unavailable')
     }
     ready.value = result.ok
-    error.value = result.ok ? null : result.error
+    error.value = result.ok ? pending?.error ?? null : result.error
     if (result.ok) document.value = result.data
   }
 
@@ -43,6 +46,9 @@ export function createTrackerState(getStorage: () => StoragePort, now = () => ne
     if (!ready.value || !document.value) return
     const habit = document.value.habits.find(habit => habit.id === id)
     if (!habit || habit.startedOn > today.value) return
+    // A new explicit checkbox action replaces the previous failed intent.
+    pending = null
+    error.value = null
     const dates = new Set(document.value.completions[id])
     if (done) dates.add(today.value)
     else dates.delete(today.value)
@@ -58,7 +64,7 @@ export function createTrackerState(getStorage: () => StoragePort, now = () => ne
     if (!result.ok) {
       error.value = result.error
       ready.value = result.error.code === 'write-failed'
-      pending = { id, done, date: today.value }
+      pending = { id, done, date: today.value, error: result.error }
       return
     }
     document.value = result.data
@@ -69,7 +75,6 @@ export function createTrackerState(getStorage: () => StoragePort, now = () => ne
     const intent = pending
     if (intent && intent.date !== localDate(now())) {
       refresh()
-      announcement.value = 'The day changed. Check today’s habits before marking them done.'
     } else if (intent) {
       toggle(intent.id, intent.done)
     } else {

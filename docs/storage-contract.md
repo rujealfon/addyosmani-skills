@@ -15,7 +15,7 @@ save(storage: StoragePort, document: TrackerDocument): SaveResult
 - Save success: `{ ok: true, data }`, containing the validated canonical document that was saved.
 - Failure: `{ ok: false, error: { code, message } }`. Codes are `unavailable`, `invalid-data`, `unsupported-version`, and `write-failed`. Failures carry no new saved document.
 
-The UI may publish a mutation only after save succeeds. Checkbox actions must be idempotent, and failed writes retain the previous saved state. Retry uses the same candidate or reloads storage, depending on which action failed.
+The UI may publish a mutation only after save succeeds. Checkbox actions must be idempotent, and failed writes retain the previous saved state. Same-day focus, visibility, and storage-event refresh preserve a failed edit and its error while loading the latest saved data. Retry reconstructs the candidate from that latest data. A new explicit checkbox action replaces the previous failed intent. A changed local date cancels it with an announcement, so retry cannot silently complete another day.
 
 ## Schema
 

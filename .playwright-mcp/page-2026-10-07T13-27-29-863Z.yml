@@ -1,0 +1,81 @@
+- generic [ref=e2]:
+  - link "Skip to habits" [ref=e3] [cursor=pointer]:
+    - /url: "#habits"
+  - generic [ref=e4]:
+    - banner [ref=e5]:
+      - generic [aria-hidden] [ref=e6]: ✓
+      - text: Daily practice
+    - main [ref=e7]:
+      - generic [ref=e8]:
+        - generic [ref=e9]:
+          - heading "Today's habits" [level=1] [ref=e10]
+          - paragraph [ref=e11]:
+            - time [ref=e12]: Wednesday, October 7, 2026
+        - paragraph [ref=e13]:
+          - strong [ref=e14]: 0 / 3
+          - text: done today
+      - list "Habits for today" [ref=e15]:
+        - listitem [ref=e16]:
+          - generic [ref=e17]:
+            - generic [ref=e18] [cursor=pointer]:
+              - checkbox "Reading At least 20 minutes" [ref=e19]
+              - generic [ref=e20]:
+                - generic [ref=e21]: Reading
+                - generic [ref=e22]: At least 20 minutes
+            - generic [ref=e23]: Not done yet
+          - generic [ref=e24]:
+            - generic [ref=e25]:
+              - generic [ref=e26]:
+                - term [ref=e27]: Current streak
+                - definition [ref=e28]: 0 days
+              - generic [ref=e29]:
+                - term [ref=e30]: Longest streak
+                - definition [ref=e31]: 0 days
+            - paragraph [ref=e32]:
+              - text: Daily goal
+              - generic [ref=e33]: Today stays open until midnight
+        - listitem [ref=e34]:
+          - generic [ref=e35]:
+            - generic [ref=e36] [cursor=pointer]:
+              - checkbox "Sleep At least 7 hours. Log on the day you wake up." [ref=e37]
+              - generic [ref=e38]:
+                - generic [ref=e39]: Sleep
+                - generic [ref=e40]: At least 7 hours. Log on the day you wake up.
+            - generic [ref=e41]: Not done yet
+          - generic [ref=e42]:
+            - generic [ref=e43]:
+              - generic [ref=e44]:
+                - term [ref=e45]: Current streak
+                - definition [ref=e46]: 0 days
+              - generic [ref=e47]:
+                - term [ref=e48]: Longest streak
+                - definition [ref=e49]: 0 days
+            - paragraph [ref=e50]:
+              - text: Daily goal
+              - generic [ref=e51]: Today stays open until midnight
+        - listitem [ref=e52]:
+          - generic [ref=e53]:
+            - generic [ref=e54] [cursor=pointer]:
+              - checkbox "Exercise At least 30 minutes" [ref=e55]
+              - generic [ref=e56]:
+                - generic [ref=e57]: Exercise
+                - generic [ref=e58]: At least 30 minutes
+            - generic [ref=e59]: Not done yet
+          - generic [ref=e60]:
+            - generic [ref=e61]:
+              - generic [ref=e62]:
+                - term [ref=e63]: Current streak
+                - definition [ref=e64]: 0 weeks
+              - generic [ref=e65]:
+                - term [ref=e66]: Longest streak
+                - definition [ref=e67]: 0 weeks
+            - paragraph [ref=e68]:
+              - text: 0 of 3 days this week
+              - generic [ref=e69]: Monday to Sunday
+      - paragraph [ref=e70]: An unfinished today keeps yesterday's streak. A missed day resets it. Weekly streaks follow your weekly goal.
+      - status [ref=e71]
+    - contentinfo [ref=e72]:
+      - paragraph [ref=e73]:
+        - strong [ref=e74]: Your habits stay on this device.
+        - text: No account or cloud sync.
+      - paragraph [ref=e75]: Clearing this browser's site data removes your history.
